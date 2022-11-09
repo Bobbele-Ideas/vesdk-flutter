@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:imgly_sdk/imgly_sdk.dart';
 import 'package:video_editor_sdk/video_editor_sdk.dart';
 
@@ -46,29 +47,43 @@ class _MyAppState extends State<MyApp> {
     return configuration;
   }
 
-  void presentEditor() async {
-    final result = await VESDK.openEditor(Video("assets/Skater.mp4"),
+  void presentEditor(String videoPath) async {
+    final result = await VESDK.openEditor(Video(videoPath),
         configuration: createConfiguration());
     print(result?.toJson());
+  }
+
+  void openCustomVideoInEditor() async {
+    final video = await ImagePicker().pickVideo(source: ImageSource.gallery);
+    if (video == null) {
+      print('Import video failed.');
+      return;
+    }
+    presentEditor(video.path);
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-          appBar: AppBar(
-            title: const Text('VideoEditor SDK Example'),
-          ),
-          body: ListView.builder(
-            itemBuilder: (context, index) {
-              return ListTile(
-                title: Text("Open video editor"),
-                subtitle: Text("Click to edit a sample video."),
-                onTap: presentEditor,
-              );
-            },
-            itemCount: 1,
-          )),
+        appBar: AppBar(
+          title: const Text('VideoEditor SDK Example'),
+        ),
+        body: ListView(
+          children: [
+            ListTile(
+              title: Text("Open video editor"),
+              subtitle: Text("Click to edit a sample video."),
+              onTap: () => presentEditor("assets/Skater.mp4"),
+            ),
+            ListTile(
+              title: Text("Open video editor"),
+              subtitle: Text("Click to edit a custom video."),
+              onTap: openCustomVideoInEditor,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
